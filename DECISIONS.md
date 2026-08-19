@@ -1,36 +1,27 @@
-# Engineering Decisions & Reflection
+# Decisions
 
-## 1. Track Choice
+**Track:** Part 2 (home page)
 
-I am submitting for **Part 2: The Premium Home Page track**.  
-*(Note: The ingestion-strategy question in the assessment prompt is specific to Part 1, so I am focusing on the frontend product experience here).*
+## 1. Why this approach over the obvious alternative
 
----
+The brief's question is really about the scraper track, but the closest thing I did was choose how the build plan gets generated. The obvious alternative was calling a real AI API (OpenAI, Claude, etc.) to generate the flowchart.
 
-## 2. Trade-Off Made Under the Time Limit
+I didn't, on purpose. A real API needs a key, which breaks the "just works, no setup" goal. It's also non-deterministic — same input could give a different result each time, which makes it harder to demo and harder for me to explain why a step showed up. So `generatePlan()` is plain rule-based logic: it checks the stack and requirements you typed (needs auth? needs payments? frontend-only or full-stack?) and builds the steps from that. Less "smart," but I can point to the exact line that added any given step. It's written so a real API could swap in later without touching the UI.
 
-**Decision:** I built the flowchart using custom HTML/CSS cards combined with inline SVG arrows calculated using a simple BFS (Breadth-First Search) depth grouping algorithm, rather than pulling in a heavy external library like React Flow or D3.js.
+## 2. One trade-off, and what I'd change with a full week
 
-**Why:**
-- **Simplicity & Speed:** I wanted something lightweight and easy to explain line-by-line during an interview without getting bogged down in complex third-party library abstractions.
-- **Accessibility:** Using standard HTML elements meant the flowchart nodes naturally support keyboard navigation (`Tab`, `Enter`, `Space`) and focus outlines right out of the box.
+I built the flowchart myself with plain HTML/CSS cards and SVG lines, instead of using a library like React Flow. Mainly so I'd actually understand every part of it and could explain it easily, and it gave me keyboard navigation for free since everything's real buttons/divs.
 
-**What I'd do with a full week:**
-Given a full week, I would integrate **React Flow**. That would give users interactive drag-and-drop nodes, smooth canvas panning/zooming, automatic curved line routing to avoid overlaps in large graphs, and a mini-map preview — while keeping custom keyboard navigation wrappers for accessibility.
+With a full week I'd switch to React Flow — better line routing, drag-and-drop, zoom/pan — but I'd keep my own accessibility layer on top since libraries like that don't handle it well by default.
 
----
+## 3. Where I used AI, and what I checked myself
 
-## 3. How AI Tools Were Used & What I Personally Verified
+Used AI to help scaffold components and boilerplate faster. What I personally checked afterward:
+- Tested `generatePlan()` with different inputs (frontend-only vs full-stack) to make sure the steps made sense each time
+- Went through the flowchart's layer-grouping logic by hand and fixed some SVG arrow positions
+- Tested at 390px and 1440px, fixed a couple of layout bugs, tabbed through everything with just a keyboard
+- Swept the whole app for fake stats, fake testimonials, or fake numbers and removed any I found
 
-I used AI assistance for initial component boilerplate and layout scaffolding, but I manually reviewed, tuned, and verified all the logic and design details:
+## Easter egg
 
-1. **Plan Generation Logic (`lib/plan-generator.ts`)**: I tested the keyword detection logic with various inputs (frontend-only stacks like React+TypeScript vs full-stack setups with Node, Postgres, and Docker) to ensure the generated flowchart steps and parallel branches made practical sense.
-2. **Flowchart Positioning & Arrows (`components/FlowChart.tsx`)**: I verified the layer grouping algorithm to make sure parallel steps (like Backend and Database) display side-by-side cleanly, and fixed the SVG coordinate math for the connection arrows.
-3. **Responsive Design & Accessibility**: I manually tested the layout at mobile (390px) and desktop (1440px) screen sizes to fix text clipping and stacking issues. I also verified keyboard navigation through form inputs and flowchart nodes.
-4. **Product Honesty**: I did a strict sweep across the app to make sure there are no fake metrics, fake customer counts, or fake testimonials anywhere.
-
----
-
-## 4. Easter Egg
-
-I added a small Konami code listener (`↑ ↑ ↓ ↓ ← → ← → B A`) in `Footer.tsx` that reveals a quick hidden message when typed on the keyboard!
+Konami code (↑ ↑ ↓ ↓ ← → ← → B A) hidden in the footer.
